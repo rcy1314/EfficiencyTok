@@ -10,7 +10,7 @@ use App\Models\RSSTemplate;
 use App\Models\VideoTemplate;
 
 class UserController {
-    static public function get(string $username) {
+    public static function get(string $username) {
         $cursor = Misc::getCursor();
         $api = Wrappers::api();
         $user = $api->user($username);
@@ -18,17 +18,13 @@ class UserController {
         if ($user->ok()) {
             $info = $user->getInfo();
             $feed = $user->getFeed();
-            if ($info->detail->privateAccount) {
-                ErrorHandler::showText(401, "Private account detected! Not supported");
-                return;
-            }
             Wrappers::latte('user', new FullTemplate($info->detail->nickname, $info, $feed));
         } else {
             ErrorHandler::showMeta($user->error());
         }
     }
 
-    static public function video(string $username, string $video_id) {
+    public static function video(string $username, string $video_id) {
         $api = Wrappers::api();
         $video = $api->video($video_id);
         $video->feed();
@@ -41,14 +37,14 @@ class UserController {
         }
     }
 
-    static public function rss(string $username) {
+    public static function rss(string $username) {
         $api = Wrappers::api();
         $user = $api->user($username);
         $user->feed();
         if ($user->ok()) {
             $data = $user->getFull();
             Misc::rss($username);
-            Wrappers::latte('rss', new RSSTemplate($username, $data->info->detail->signature, UrlBuilder::user($username), $data->feed->items));
+            Wrappers::latte('rss', new RSSTemplate($data->info->detail->nickname, $data->info->detail->signature, UrlBuilder::stream($data->info->detail->avatarLarger), UrlBuilder::user($username), $data->feed->items));
         }
     }
 }

@@ -53,12 +53,8 @@ $router->get('/manifest', function () {
 
 $router->get('/stream', 'ProxyController@stream');
 $router->get('/download', 'ProxyController@download');
-$router->get('/redirect', 'RedirectController@redirect');
-
-$router->mount('/trending', function () use ($router) {
-    $router->get('/', 'TrendingController@get');
-    $router->get('/rss', 'TrendingController@rss');
-});
+$router->get('/redirect/search', 'RedirectController@search');
+$router->get('/redirect/download', 'RedirectController@download');
 
 $router->mount('/@([^/]+)', function () use ($router) {
     $router->get('/', 'UserController@get');
@@ -66,8 +62,6 @@ $router->mount('/@([^/]+)', function () use ($router) {
     $router->get('/rss', 'UserController@rss');
 });
 
-// Deprecated, please use /@USERNAME/video/VIDEO_ID instead
-$router->get('/video/(\w+)', 'VideoController@get');
 // Workaround that allows /t endpoints
 $router->get('/t/([^/]+)', 'VideoController@get');
 
@@ -78,6 +72,14 @@ $router->mount('/tag/([^/]+)', function () use ($router) {
 
 $router->get('/music/([^/]+)', 'MusicController@get');
 
+// For you
+$router->mount('/foryou', function () use ($router) {
+    $router->get('/', 'ForYouController@get');
+    $router->get('/rss', 'ForYouController@rss');
+});
+
+$router->get('/following', 'FollowingController@get');
+
 // -- Settings -- //
 $router->mount('/settings', function () use ($router) {
     $router->get('/', 'SettingsController@index');
@@ -85,8 +87,6 @@ $router->mount('/settings', function () use ($router) {
     $router->post('/api', 'SettingsController@api');
     $router->post('/misc', 'SettingsController@misc');
 });
-
-$router->get('/discover', 'DiscoverController@get');
 
 // -- EMBED -- //
 $router->get('/embed/v2/(\d+)', 'EmbedController@v2');
